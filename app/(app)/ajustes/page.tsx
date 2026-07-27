@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getPerfil } from "@/lib/datos";
+import { getPerfil, getTarifas } from "@/lib/datos";
 import { PerfilForm } from "@/components/perfil/perfil-form";
+import { TarifasForm } from "@/components/ajustes/tarifas-form";
 import { logout } from "@/app/auth/actions";
 
 // Ajustes: edición normal del perfil (a diferencia del onboarding, no marca
@@ -14,13 +15,15 @@ export default async function AjustesPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const perfil = await getPerfil();
+  const [perfil, tarifas] = await Promise.all([getPerfil(), getTarifas()]);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-2xl border border-borde bg-superficie p-5">
         <PerfilForm perfil={perfil} userId={user.id} modo="ajustes" />
       </div>
+
+      <TarifasForm tarifas={tarifas} />
 
       <form action={logout}>
         <button

@@ -10,6 +10,9 @@ Correr en orden:
 3. `0003_perfil_onboarding.sql` — columnas de perfil (apellido, teléfono,
    Instagram, nivel AADIDESS, foto), bandera `onboarding_completado` y bucket
    de Storage `fotos-perfil` (público de lectura) con RLS por profesor.
+4. `0004_guardar_tarifa.sql` — función `guardar_tarifa` que actualiza el
+   valor por hora y, opcionalmente, propaga el precio a las clases de la
+   temporada en curso (año calendario). Nunca toca temporadas anteriores.
 
 > El trigger `on_auth_user_created` crea el perfil + las 4 tarifas default
 > cada vez que se registra un usuario nuevo. Conviene correr esta migración
