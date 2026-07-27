@@ -23,6 +23,21 @@ export const TARIFAS_DEFAULT: Record<ProductoId, number> = {
   requerida: 20000,
 };
 
+// --- Perfil del profesor ---
+
+/** Nivel de certificación AADIDESS (1 a 5). */
+export type NivelInstructor = "1" | "2" | "3" | "4" | "5";
+
+export const NIVELES_INSTRUCTOR: NivelInstructor[] = ["1", "2", "3", "4", "5"];
+
+/** true si el string es un nivel AADIDESS válido. */
+export function esNivelValido(v: string): v is NivelInstructor {
+  return (NIVELES_INSTRUCTOR as string[]).includes(v);
+}
+
+/** Bucket de Storage donde vive la foto de perfil (ver migración 0003). */
+export const BUCKET_FOTOS = "fotos-perfil";
+
 export const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",

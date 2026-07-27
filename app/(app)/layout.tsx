@@ -1,12 +1,19 @@
+import { redirect } from "next/navigation";
 import { Tabbar } from "@/components/app/tabbar";
-import { getNombrePerfil } from "@/lib/datos";
+import { getPerfil } from "@/lib/datos";
 
 export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const nombre = await getNombrePerfil();
+  const perfil = await getPerfil();
+
+  // Onboarding primero: si el profe todavía no completó su perfil, no entra
+  // a la app hasta hacerlo. (La página de onboarding hace lo inverso.)
+  if (!perfil?.onboarding_completado) redirect("/onboarding");
+
+  const nombre = perfil.nombre;
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col">

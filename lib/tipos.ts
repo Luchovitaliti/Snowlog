@@ -1,10 +1,16 @@
-import type { ProductoId } from "@/lib/dominio";
+import type { NivelInstructor, ProductoId } from "@/lib/dominio";
 
-// Filas de la base (ver supabase/migraciones/0001_esquema_inicial.sql).
+// Filas de la base (ver supabase/migraciones/0001 y 0003).
 
 export type Perfil = {
   id: string;
   nombre: string;
+  apellido: string;
+  telefono: string;
+  instagram: string;
+  nivel_instructor: NivelInstructor | null;
+  foto_url: string | null;
+  onboarding_completado: boolean;
   creado_en: string;
 };
 
