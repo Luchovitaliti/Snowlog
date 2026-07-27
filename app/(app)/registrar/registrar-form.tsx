@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import Link from "next/link";
 import {
   PRODUCTOS,
   fmtPesos,
@@ -10,20 +11,28 @@ import {
   productoPorId,
   type ProductoId,
 } from "@/lib/dominio";
-import type { TarifasMap } from "@/lib/tipos";
-import { crearClase, type CrearState } from "./actions";
+import type { Clase, TarifasMap } from "@/lib/tipos";
+import { crearClase, editarClase, type CrearState } from "./actions";
 
-export function RegistrarForm({ tarifas }: { tarifas: TarifasMap }) {
+export function RegistrarForm({
+  tarifas,
+  claseEditar,
+}: {
+  tarifas: TarifasMap;
+  claseEditar?: Clase | null;
+}) {
+  const accion = claseEditar ? editarClase : crearClase;
   const [state, formAction, pending] = useActionState<CrearState, FormData>(
-    crearClase,
+    accion,
     {},
   );
 
-  // Cada guardado exitoso trae un nonce nuevo → remonta los campos (reset).
+  // Cada guardado exitoso (solo en alta) trae un nonce nuevo → remonta los campos.
   return (
     <CamposClase
       key={state.nonce ?? 0}
       tarifas={tarifas}
+      claseEditar={claseEditar}
       formAction={formAction}
       pending={pending}
       error={state.error}
@@ -34,19 +43,24 @@ export function RegistrarForm({ tarifas }: { tarifas: TarifasMap }) {
 
 function CamposClase({
   tarifas,
+  claseEditar,
   formAction,
   pending,
   error,
   guardada: guardadaInicial,
 }: {
   tarifas: TarifasMap;
+  claseEditar?: Clase | null;
   formAction: (formData: FormData) => void;
   pending: boolean;
   error?: string;
   guardada: boolean;
 }) {
-  const [producto, setProducto] = useState<ProductoId>("colectiva");
-  const [horas, setHoras] = useState(3);
+  const editando = Boolean(claseEditar);
+  const [producto, setProducto] = useState<ProductoId>(
+    claseEditar?.producto ?? "colectiva",
+  );
+  const [horas, setHoras] = useState(claseEditar?.horas ?? 3);
   const [guardada, setGuardada] = useState(guardadaInicial);
 
   // El "✓ Guardada" se limpia solo (setState va dentro del timeout, no sincrónico).
@@ -69,8 +83,23 @@ function CamposClase({
   return (
     <form action={formAction} className="flex flex-col">
       {/* Campos que no son inputs nativos van por hidden */}
+      {editando && <input type="hidden" name="id" value={claseEditar!.id} />}
       <input type="hidden" name="producto" value={producto} />
       <input type="hidden" name="horas" value={horas} />
+
+      {editando && (
+        <div className="mt-1 flex items-center justify-between rounded-xl border border-[#FBBF24]/35 bg-[#FBBF24]/[0.08] px-3.5 py-2.5">
+          <span className="text-[13px] font-semibold text-[#FBBF24]">
+            ✎ Editando clase
+          </span>
+          <Link
+            href="/registrar"
+            className="rounded-lg border border-[#3A3325] px-2.5 py-[5px] text-xs font-semibold text-[#FBBF24]"
+          >
+            Cancelar
+          </Link>
+        </div>
+      )}
 
       <label className="mb-2 mt-[18px] block text-[11px] font-bold uppercase tracking-[2px] text-tenue-2">
         Fecha
@@ -78,7 +107,7 @@ function CamposClase({
       <input
         type="date"
         name="fecha"
-        defaultValue={hoyISO()}
+        defaultValue={claseEditar?.fecha ?? hoyISO()}
         suppressHydrationWarning
         className="w-full rounded-xl border border-borde bg-superficie px-3.5 py-3 text-base text-texto outline-none [color-scheme:dark]"
       />
@@ -166,7 +195,7 @@ function CamposClase({
       <input
         type="text"
         name="nota"
-        defaultValue=""
+        defaultValue={claseEditar?.nota ?? ""}
         placeholder="Alumno, detalle, lo que quieras…"
         className="w-full rounded-xl border border-borde bg-superficie px-3.5 py-3 text-base text-texto outline-none placeholder:text-tenue-2"
       />
@@ -192,7 +221,15 @@ function CamposClase({
           disabled={pending}
           className="whitespace-nowrap rounded-2xl bg-acento px-5 py-3.5 text-[15px] font-extrabold text-[#06141F] disabled:opacity-60"
         >
-          {guardada ? "✓ Guardada" : pending ? "Guardando…" : "Registrar clase"}
+          {editando
+            ? pending
+              ? "Guardando…"
+              : "Guardar cambios"
+            : guardada
+              ? "✓ Guardada"
+              : pending
+                ? "Guardando…"
+                : "Registrar clase"}
         </button>
       </div>
     </form>
