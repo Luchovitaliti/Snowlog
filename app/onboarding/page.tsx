@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
   if (perfil?.onboarding_completado) redirect("/registrar");
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col justify-center px-6 py-10">
+    <main className="mx-auto flex min-h-[100dvh] w-full max-w-[480px] flex-col justify-center px-6 py-10">
       <div className="mb-6 text-center">
         <div className="text-[10px] font-bold tracking-[3px] text-tenue-2">
           LAS LEÑAS · TEMPORADA {new Date().getFullYear()}

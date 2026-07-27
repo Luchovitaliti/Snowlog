@@ -13,7 +13,7 @@ export function Tabbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-1/2 flex w-full max-w-[480px] -translate-x-1/2 border-t border-borde-tenue bg-fondo/95 px-0 pt-2 pb-[calc(10px+env(safe-area-inset-bottom))] backdrop-blur-md">
+    <nav className="flex w-full shrink-0 border-t border-borde-tenue bg-fondo/95 px-0 pt-2 pb-[calc(10px+env(safe-area-inset-bottom))] backdrop-blur-md">
       {TABS.map((t) => {
         const activo = pathname === t.href;
         return (

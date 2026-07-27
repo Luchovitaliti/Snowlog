@@ -16,8 +16,8 @@ export default async function AppLayout({
   const nombre = perfil.nombre;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col">
-      <header className="border-b border-borde-tenue px-5 pb-[18px] pt-[calc(20px+env(safe-area-inset-top))]">
+    <div className="mx-auto flex h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden">
+      <header className="shrink-0 border-b border-borde-tenue px-5 pb-[18px] pt-[calc(20px+env(safe-area-inset-top))]">
         <div className="text-[10px] font-bold tracking-[3px] text-tenue-2">
           LAS LEÑAS · TEMPORADA {new Date().getFullYear()}
         </div>
@@ -29,7 +29,9 @@ export default async function AppLayout({
         </div>
       </header>
 
-      <main className="flex-1 px-5 pb-[calc(90px+env(safe-area-inset-bottom))] pt-4">
+      {/* Única área con scroll: el resto de la pantalla queda fijo (header y
+          tabbar). overscroll-contain evita que el scroll "escape" al documento. */}
+      <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-6 pt-4">
         {children}
       </main>
 

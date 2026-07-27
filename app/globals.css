@@ -34,10 +34,15 @@ html {
 
 body {
   background: linear-gradient(180deg, #060b12 0%, #0a121d 100%);
-  min-height: 100vh;
+  /* Altura real de la pantalla (dvh, no vh) para que ande bien con la barra
+     dinámica de Safari en iPhone. */
+  min-height: 100dvh;
   color: var(--color-texto);
   font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
+  /* App nativa: sin "rebote"/bounce del scroll del documento. El scroll vive
+     dentro del área de contenido (main), nunca en toda la pantalla. */
+  overscroll-behavior: none;
 }
 
 input,
