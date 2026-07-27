@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060B12">
+<title>SnowLog · Las Leñas</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏔️</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: linear-gradient(180deg, #060B12 0%, #0A121D 100%);
+    min-height: 100vh;
+    font-family: 'Avenir Next', 'Helvetica Neue', system-ui, sans-serif;
+    color: #F0F6FC;
+  }
+  .app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+  .header {
+    position: relative; padding: calc(20px + env(safe-area-inset-top)) 20px 18px;
+    border-bottom: 1px solid #16202E; overflow: hidden;
+  }
+  .header::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(160deg, transparent 55%, rgba(125,211,252,0.06) 55.5%, rgba(125,211,252,0.02) 70%, transparent 70.5%),
+                linear-gradient(200deg, transparent 65%, rgba(125,211,252,0.05) 65.5%, transparent 80%);
+  }
+  .eyebrow { font-size: 10px; letter-spacing: 3px; color: #5B7089; font-weight: 700; }
+  .titulo { font-size: 32px; font-weight: 900; letter-spacing: 1px; margin-top: 4px; line-height: 1; }
+  .titulo span { color: #7DD3FC; }
+  .subtitulo { font-size: 13px; color: #8FA3B8; margin-top: 6px; }
+  .contenido { flex: 1; padding: 16px 20px calc(90px + env(safe-area-inset-bottom)); }
+  .label {
+    display: block; font-size: 11px; letter-spacing: 2px; color: #5B7089;
+    font-weight: 700; text-transform: uppercase; margin: 18px 0 8px;
+  }
+  input[type="date"], input[type="text"], input[type="number"] {
+    width: 100%; padding: 12px 14px; background: #0D1520; border: 1px solid #1E2A3A;
+    border-radius: 12px; color: #F0F6FC; font-size: 16px; font-family: inherit;
+    color-scheme: dark; outline: none;
+  }
+  .prods { display: grid; gap: 10px; }
+  .prod-btn {
+    display: flex; align-items: center; gap: 10px; padding: 13px 14px; border-radius: 12px;
+    border: 1.5px solid #1E2A3A; background: #0D1520; cursor: pointer; font-family: inherit;
+    text-align: left; width: 100%;
+  }
+  .prod-btn .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .prod-btn .nombre { color: #8FA3B8; font-weight: 600; font-size: 14px; }
+  .prod-btn .precio { margin-left: auto; font-size: 12px; color: #5B7089; font-variant-numeric: tabular-nums; }
+  .prod-btn.activo .nombre { color: #F0F6FC; }
+  .horas { display: flex; gap: 10px; }
+  .hora-btn {
+    flex: 1; padding: 13px 0; border-radius: 12px; border: 1.5px solid #1E2A3A;
+    background: #0D1520; color: #8FA3B8; font-size: 16px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+  }
+  .hora-btn.activo { border-color: #7DD3FC; background: rgba(125,211,252,0.08); color: #E2F3FF; }
+  .resumen-form {
+    margin-top: 24px; display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; padding: 16px; background: #0D1520; border: 1px solid #1E2A3A; border-radius: 16px;
+  }
+  .resumen-form .lbl { font-size: 12px; color: #5B7089; letter-spacing: 1px; }
+  .resumen-form .monto { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .btn-primario {
+    padding: 14px 22px; border-radius: 14px; border: none; background: #7DD3FC;
+    color: #06141F; font-weight: 800; font-size: 15px; cursor: pointer;
+    font-family: inherit; white-space: nowrap;
+  }
+  .banner-ed {
+    display: flex; align-items: center; justify-content: space-between; padding: 10px 14px;
+    background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.35);
+    border-radius: 12px; margin-top: 4px;
+  }
+  .banner-ed span { font-size: 13px; color: #FBBF24; font-weight: 600; }
+  .banner-ed button {
+    background: none; border: 1px solid #3A3325; border-radius: 8px; color: #FBBF24;
+    font-size: 12px; font-weight: 600; padding: 5px 10px; cursor: pointer; font-family: inherit;
+  }
+  .mes-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .mes-nav button {
+    width: 40px; height: 40px; border-radius: 12px; border: 1px solid #1E2A3A;
+    background: #0D1520; color: #8FA3B8; font-size: 20px; cursor: pointer;
+  }
+  .mes-nav .mes { font-weight: 800; font-size: 17px; }
+  .tarjeta-total {
+    padding: 18px 16px; background: linear-gradient(145deg, #0D1826, #0B1420);
+    border: 1px solid #1E2A3A; border-radius: 18px; margin-bottom: 16px;
+  }
+  .tot-fila { display: flex; justify-content: space-between; align-items: flex-end; }
+  .tot-lbl { font-size: 10px; letter-spacing: 2px; color: #5B7089; font-weight: 700; }
+  .tot-val { font-size: 26px; font-weight: 900; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tot-val.plata { color: #7DD3FC; }
+  .desglose { margin-top: 14px; border-top: 1px solid #1E2A3A; padding-top: 12px; }
+  .desg-fila { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; }
+  .desg-fila .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .desg-fila .nom { color: #B8C7D9; }
+  .desg-fila .det { margin-left: auto; color: #8FA3B8; font-variant-numeric: tabular-nums; }
+  .btn-exportar {
+    width: 100%; padding: 13px 0; border-radius: 14px; border: 1.5px solid #7DD3FC;
+    background: rgba(125,211,252,0.06); color: #7DD3FC; font-weight: 700; font-size: 14px;
+    cursor: pointer; font-family: inherit; margin-bottom: 16px;
+  }
+  .item-clase {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #0D1520;
+    border: 1px solid #16202E; border-radius: 14px; margin-bottom: 10px;
+  }
+  .item-clase .barra { width: 4px; align-self: stretch; border-radius: 2px; }
+  .item-clase .info { flex: 1; min-width: 0; }
+  .item-clase .fecha { font-weight: 700; font-size: 14px; }
+  .item-clase .det { font-size: 13px; color: #8FA3B8; margin-top: 2px; }
+  .item-clase .derecha { text-align: right; }
+  .item-clase .monto { font-weight: 700; color: #B8C7D9; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .item-clase .acciones { display: flex; gap: 12px; justify-content: flex-end; margin-top: 4px; }
+  .item-clase .acciones button {
+    background: none; border: none; font-size: 11px; cursor: pointer; padding: 0;
+    text-decoration: underline; font-family: inherit;
+  }
+  .btn-editar { color: #7DD3FC; }
+  .btn-borrar { color: #5B7089; }
+  .btn-borrar.confirmar { color: #F87171; font-weight: 700; }
+  .vacio { text-align: center; color: #5B7089; font-size: 14px; line-height: 1.7; padding: 40px 20px; }
+  .fila-tarifa {
+    display: flex; align-items: center; gap: 10px; padding: 14px; background: #0D1520;
+    border: 1px solid #1E2A3A; border-radius: 14px; margin-bottom: 10px;
+  }
+  .fila-tarifa .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .fila-tarifa .nom { color: #F0F6FC; font-weight: 600; font-size: 14px; flex: 1; }
+  .fila-tarifa .signo { color: #5B7089; font-size: 14px; }
+  .fila-tarifa input {
+    width: 100px; padding: 8px 10px; background: #060B12; text-align: right;
+    font-weight: 700; border-radius: 10px; font-variant-numeric: tabular-nums;
+  }
+  .nota-ajustes { color: #8FA3B8; font-size: 13px; line-height: 1.5; margin-bottom: 14px; }
+  .tabbar {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px; display: flex;
+    background: rgba(6,11,18,0.95); backdrop-filter: blur(12px);
+    border-top: 1px solid #16202E; padding: 8px 0 calc(10px + env(safe-area-inset-bottom));
+  }
+  .tab-btn {
+    flex: 1; background: none; border: none; cursor: pointer; font-family: inherit;
+    padding: 6px 0; color: #5B7089;
+  }
+  .tab-btn.activo { color: #7DD3FC; }
+  .tab-btn .ico { font-size: 18px; line-height: 1; }
+  .tab-btn .lbl { font-size: 11px; margin-top: 3px; font-weight: 600; }
+  .oculto { display: none !important; }
+  .export-panel {
+    padding: 14px; background: #0D1520; border: 1px solid #1E2A3A;
+    border-radius: 16px; margin-bottom: 16px;
+  }
+  .export-panel .cabecera { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .export-panel .titulo-panel { font-size: 12px; letter-spacing: 2px; color: #5B7089; font-weight: 700; }
+  .export-panel .cerrar { background: none; border: none; color: #5B7089; font-size: 14px; cursor: pointer; }
+  .export-panel textarea {
+    width: 100%; min-height: 160px; padding: 10px 12px; background: #060B12;
+    border: 1px solid #1E2A3A; border-radius: 12px; color: #B8C7D9; font-size: 12px;
+    line-height: 1.6; font-family: ui-monospace, 'SF Mono', Menlo, monospace; resize: vertical;
+  }
+  .export-panel .btn-primario { width: 100%; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div style="position:relative;z-index:1">
+      <div class="eyebrow">LAS LEÑAS · TEMPORADA <span id="anio-header"></span></div>
+      <div class="titulo">SNOW<span>LOG</span></div>
+      <div class="subtitulo" id="subtitulo">Registro de clases</div>
+    </div>
+  </div>
+
+  <div class="contenido">
+
+    <!-- REGISTRAR -->
+    <div id="vista-registrar">
+      <div class="banner-ed oculto" id="banner-edicion">
+        <span>✎ Editando clase</span>
+        <button onclick="cancelarEdicion()">Cancelar</button>
+      </div>
+
+      <label class="label">Fecha</label>
+      <input type="date" id="inp-fecha">
+
+      <label class="label">Producto</label>
+      <div class="prods" id="prods"></div>
+
+      <label class="label">Horas dadas</label>
+      <div class="horas" id="horas"></div>
+
+      <label class="label">Nota (opcional)</label>
+      <input type="text" id="inp-nota" placeholder="Alumno, detalle, lo que quieras…">
+
+      <div class="resumen-form">
+        <div>
+          <div class="lbl">ESTA CLASE</div>
+          <div class="monto" id="monto-preview">$0</div>
+        </div>
+        <button class="btn-primario" id="btn-guardar" onclick="guardarClase()">Registrar clase</button>
+      </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div id="vista-historial" class="oculto">
+      <div class="mes-nav">
+        <button onclick="cambiarMes(-1)">‹</button>
+        <div class="mes" id="mes-label"></div>
+        <button onclick="cambiarMes(1)">›</button>
+      </div>
+
+      <div class="tarjeta-total">
+        <div class="tot-fila">
+          <div>
+            <div class="tot-lbl">HORAS DEL MES</div>
+            <div class="tot-val" id="tot-horas">0 h</div>
+          </div>
+          <div style="text-align:right">
+            <div class="tot-lbl">A COBRAR</div>
+            <div class="tot-val plata" id="tot-plata">$0</div>
+          </div>
+        </div>
+        <div class="desglose" id="desglose"></div>
+      </div>
+
+      <button class="btn-exportar oculto" id="btn-exportar" onclick="exportarResumen()">↗ Exportar resumen del mes</button>
+
+      <div class="export-panel oculto" id="export-panel">
+        <div class="cabecera">
+          <span class="titulo-panel">RESUMEN LISTO</span>
+          <button class="cerrar" onclick="cerrarExport()">✕</button>
+        </div>
+        <textarea readonly id="export-texto" onfocus="this.select()"></textarea>
+        <button class="btn-primario" id="btn-copiar" onclick="copiarTexto()">Copiar texto</button>
+      </div>
+
+      <div id="lista-clases"></div>
+    </div>
+
+    <!-- AJUSTES -->
+    <div id="vista-tarifas" class="oculto">
+      <label class="label">Tu nombre</label>
+      <input type="text" id="inp-nombre" placeholder="Nombre del instructor…">
+
+      <label class="label">Tarifas por hora</label>
+      <div class="nota-ajustes">Las clases ya registradas conservan la tarifa del momento en que las cargaste.</div>
+      <div id="lista-tarifas"></div>
+    </div>
+
+  </div>
+
+  <div class="tabbar">
+    <button class="tab-btn activo" data-tab="registrar" onclick="irTab('registrar')">
+      <div class="ico">＋</div><div class="lbl">Registrar</div>
+    </button>
+    <button class="tab-btn" data-tab="historial" onclick="irTab('historial')">
+      <div class="ico">☰</div><div class="lbl">Historial</div>
+    </button>
+    <button class="tab-btn" data-tab="tarifas" onclick="irTab('tarifas')">
+      <div class="ico">⚙</div><div class="lbl">Ajustes</div>
+    </button>
+  </div>
+</div>
+
+<script>
+// ---------- Config ----------
+const PRODUCTOS = [
+  { id: "colectiva",  nombre: "Colectiva Adulto",    color: "#4ADE80" },
+  { id: "snowriders", nombre: "Snowriders / Olimpo", color: "#38BDF8" },
+  { id: "particular", nombre: "Particular",          color: "#FBBF24" },
+  { id: "requerida",  nombre: "Requerida",           color: "#C084FC" },
+];
+const TARIFAS_DEFAULT = { colectiva: 16000, snowriders: 12000, particular: 14000, requerida: 20000 };
+const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const DIAS = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+const STORAGE_KEY = "snowlog-data";
+
+// ---------- Estado ----------
+let clases = [];
+let tarifas = { ...TARIFAS_DEFAULT };
+let nombre = "";
+let producto = "colectiva";
+let horas = 3;
+let editandoId = null;
+let confirmarBorrarId = null;
+let confirmarTimeout = null;
+const hoy = new Date();
+let mesVista = hoy.getMonth();
+let anioVista = hoy.getFullYear();
+
+// ---------- Utils ----------
+const fmtPesos = n => "$" + Number(n || 0).toLocaleString("es-AR", { maximumFractionDigits: 0 });
+const hoyISO = () => {
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+};
+const fmtFecha = iso => {
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return `${DIAS[date.getDay()]} ${d}/${m}`;
+};
+const tarifaDe = c => c.tarifaHora ?? tarifas[c.producto] ?? 0;
+
+// ---------- Persistencia ----------
+function cargar() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      clases = data.clases || [];
+      tarifas = { ...TARIFAS_DEFAULT, ...(data.tarifas || {}) };
+      nombre = data.nombre || "";
+    }
+  } catch (e) { /* arranca vacío */ }
+}
+function persistir() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ clases, tarifas, nombre }));
+  } catch (e) { alert("No se pudo guardar. Revisá el espacio del navegador."); }
+}
+
+// ---------- Navegación ----------
+function irTab(tab) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("activo", b.dataset.tab === tab));
+  document.getElementById("vista-registrar").classList.toggle("oculto", tab !== "registrar");
+  document.getElementById("vista-historial").classList.toggle("oculto", tab !== "historial");
+  document.getElementById("vista-tarifas").classList.toggle("oculto", tab !== "tarifas");
+  if (tab === "historial") renderHistorial();
+  if (tab === "tarifas") renderTarifas();
+}
+
+// ---------- Registrar ----------
+function renderProds() {
+  const cont = document.getElementById("prods");
+  cont.innerHTML = "";
+  for (const p of PRODUCTOS) {
+    const btn = document.createElement("button");
+    btn.className = "prod-btn" + (producto === p.id ? " activo" : "");
+    if (producto === p.id) {
+      btn.style.borderColor = p.color;
+      btn.style.background = p.color + "14";
+    }
+    btn.innerHTML = `<span class="dot" style="background:${p.color}"></span>
+      <span class="nombre">${p.nombre}</span>
+      <span class="precio">${fmtPesos(tarifas[p.id])}/h</span>`;
+    btn.onclick = () => { producto = p.id; renderProds(); actualizarPreview(); };
+    cont.appendChild(btn);
+  }
+}
+function renderHoras() {
+  const cont = document.getElementById("horas");
+  cont.innerHTML = "";
+  for (const h of [1, 2, 3]) {
+    const btn = document.createElement("button");
+    btn.className = "hora-btn" + (horas === h ? " activo" : "");
+    btn.textContent = h + " h";
+    btn.onclick = () => { horas = h; renderHoras(); actualizarPreview(); };
+    cont.appendChild(btn);
+  }
+}
+function actualizarPreview() {
+  const p = PRODUCTOS.find(x => x.id === producto);
+  const el = document.getElementById("monto-preview");
+  el.textContent = fmtPesos(horas * (tarifas[producto] || 0));
+  el.style.color = p ? p.color : "#F0F6FC";
+}
+function guardarClase() {
+  const fecha = document.getElementById("inp-fecha").value || hoyISO();
+  const nota = document.getElementById("inp-nota").value.trim();
+  if (editandoId) {
+    clases = clases.map(c => {
+      if (c.id !== editandoId) return c;
+      return {
+        ...c, fecha, producto, horas, nota,
+        tarifaHora: c.producto === producto ? c.tarifaHora : tarifas[producto],
+      };
+    });
+    editandoId = null;
+    document.getElementById("banner-edicion").classList.add("oculto");
+    persistir();
+    resetForm();
+    irTab("historial");
+    return;
+  }
+  clases.unshift({
+    id: Date.now().toString(36),
+    fecha, producto, horas, nota,
+    tarifaHora: tarifas[producto],
+  });
+  persistir();
+  document.getElementById("inp-nota").value = "";
+  const btn = document.getElementById("btn-guardar");
+  btn.textContent = "✓ Guardada";
+  setTimeout(() => { btn.textContent = editandoId ? "Guardar cambios" : "Registrar clase"; }, 1800);
+}
+function resetForm() {
+  document.getElementById("inp-fecha").value = hoyISO();
+  document.getElementById("inp-nota").value = "";
+  producto = "colectiva";
+  horas = 3;
+  renderProds(); renderHoras(); actualizarPreview();
+  document.getElementById("btn-guardar").textContent = "Registrar clase";
+}
+function empezarEdicion(id) {
+  const c = clases.find(x => x.id === id);
+  if (!c) return;
+  editandoId = id;
+  document.getElementById("inp-fecha").value = c.fecha;
+  document.getElementById("inp-nota").value = c.nota || "";
+  producto = c.producto;
+  horas = c.horas;
+  renderProds(); renderHoras(); actualizarPreview();
+  document.getElementById("banner-edicion").classList.remove("oculto");
+  document.getElementById("btn-guardar").textContent = "Guardar cambios";
+  irTab("registrar");
+}
+function cancelarEdicion() {
+  editandoId = null;
+  document.getElementById("banner-edicion").classList.add("oculto");
+  resetForm();
+}
+
+// ---------- Historial ----------
+function clasesDelMes() {
+  return clases.filter(c => {
+    const [y, m] = c.fecha.split("-").map(Number);
+    return y === anioVista && m - 1 === mesVista;
+  });
+}
+function cambiarMes(delta) {
+  mesVista += delta;
+  if (mesVista < 0) { mesVista = 11; anioVista--; }
+  if (mesVista > 11) { mesVista = 0; anioVista++; }
+  renderHistorial();
+}
+function renderHistorial() {
+  document.getElementById("mes-label").textContent = `${MESES[mesVista]} ${anioVista}`;
+  const cm = clasesDelMes();
+  const totHoras = cm.reduce((s, c) => s + c.horas, 0);
+  const totPlata = cm.reduce((s, c) => s + c.horas * tarifaDe(c), 0);
+  document.getElementById("tot-horas").textContent = totHoras + " h";
+  document.getElementById("tot-plata").textContent = fmtPesos(totPlata);
+
+  const desg = document.getElementById("desglose");
+  desg.innerHTML = "";
+  for (const p of PRODUCTOS) {
+    const cs = cm.filter(c => c.producto === p.id);
+    if (!cs.length) continue;
+    const h = cs.reduce((s, c) => s + c.horas, 0);
+    const pl = cs.reduce((s, c) => s + c.horas * tarifaDe(c), 0);
+    desg.innerHTML += `<div class="desg-fila">
+      <span class="dot" style="background:${p.color}"></span>
+      <span class="nom">${p.nombre}</span>
+      <span class="det">${h} h · ${fmtPesos(pl)}</span></div>`;
+  }
+  desg.style.display = desg.innerHTML ? "" : "none";
+
+  document.getElementById("btn-exportar").classList.toggle("oculto", cm.length === 0);
+
+  const lista = document.getElementById("lista-clases");
+  lista.innerHTML = "";
+  if (!cm.length) {
+    lista.innerHTML = `<div class="vacio">Sin clases registradas este mes.<br>Registrá la primera desde la pestaña Registrar.</div>`;
+    return;
+  }
+  const ordenadas = cm.slice().sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
+  for (const c of ordenadas) {
+    const p = PRODUCTOS.find(x => x.id === c.producto);
+    const div = document.createElement("div");
+    div.className = "item-clase";
+    const esConfirmar = confirmarBorrarId === c.id;
+    div.innerHTML = `
+      <div class="barra" style="background:${p ? p.color : "#5B7089"}"></div>
+      <div class="info">
+        <div class="fecha">${fmtFecha(c.fecha)}</div>
+        <div class="det">${p ? p.nombre : c.producto} · ${c.horas} h${c.nota ? " · " + escaparHtml(c.nota) : ""}</div>
+      </div>
+      <div class="derecha">
+        <div class="monto">${fmtPesos(c.horas * tarifaDe(c))}</div>
+        <div class="acciones">
+          <button class="btn-editar" onclick="empezarEdicion('${c.id}')">editar</button>
+          <button class="btn-borrar${esConfirmar ? " confirmar" : ""}" onclick="borrarClase('${c.id}')">${esConfirmar ? "¿seguro?" : "borrar"}</button>
+        </div>
+      </div>`;
+    lista.appendChild(div);
+  }
+}
+function escaparHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+function borrarClase(id) {
+  if (confirmarBorrarId !== id) {
+    confirmarBorrarId = id;
+    clearTimeout(confirmarTimeout);
+    confirmarTimeout = setTimeout(() => { confirmarBorrarId = null; renderHistorial(); }, 3000);
+    renderHistorial();
+    return;
+  }
+  clases = clases.filter(c => c.id !== id);
+  confirmarBorrarId = null;
+  if (editandoId === id) cancelarEdicion();
+  persistir();
+  renderHistorial();
+}
+
+// ---------- Exportar ----------
+function generarResumen() {
+  const cm = clasesDelMes();
+  const lineas = [];
+  lineas.push(`🏔️ SNOWLOG · ${MESES[mesVista]} ${anioVista}`);
+  lineas.push(`Instructor: ${nombre || "—"}`);
+  lineas.push("");
+  const ordenadas = cm.slice().sort((a, b) => (a.fecha > b.fecha ? 1 : -1));
+  for (const c of ordenadas) {
+    const p = PRODUCTOS.find(x => x.id === c.producto);
+    lineas.push(`${fmtFecha(c.fecha)} · ${p ? p.nombre : c.producto} · ${c.horas}h · ${fmtPesos(c.horas * tarifaDe(c))}${c.nota ? ` (${c.nota})` : ""}`);
+  }
+  lineas.push("");
+  lineas.push("— Por producto —");
+  for (const p of PRODUCTOS) {
+    const cs = cm.filter(c => c.producto === p.id);
+    if (!cs.length) continue;
+    const h = cs.reduce((s, c) => s + c.horas, 0);
+    const pl = cs.reduce((s, c) => s + c.horas * tarifaDe(c), 0);
+    lineas.push(`${p.nombre}: ${h}h · ${fmtPesos(pl)}`);
+  }
+  lineas.push("");
+  const totH = cm.reduce((s, c) => s + c.horas, 0);
+  const totP = cm.reduce((s, c) => s + c.horas * tarifaDe(c), 0);
+  lineas.push(`TOTAL: ${totH}h · ${fmtPesos(totP)}`);
+  return lineas.join("\n");
+}
+async function exportarResumen() {
+  const texto = generarResumen();
+  if (navigator.share) {
+    try { await navigator.share({ text: texto }); return; }
+    catch (e) { if (e.name === "AbortError") return; }
+  }
+  document.getElementById("export-texto").value = texto;
+  document.getElementById("export-panel").classList.remove("oculto");
+}
+function cerrarExport() {
+  document.getElementById("export-panel").classList.add("oculto");
+}
+async function copiarTexto() {
+  const texto = document.getElementById("export-texto").value;
+  try {
+    await navigator.clipboard.writeText(texto);
+    const btn = document.getElementById("btn-copiar");
+    btn.textContent = "✓ Copiado";
+    setTimeout(() => { btn.textContent = "Copiar texto"; }, 1800);
+  } catch (e) { /* queda el texto visible para copiar a mano */ }
+}
+
+// ---------- Ajustes ----------
+function renderTarifas() {
+  document.getElementById("inp-nombre").value = nombre;
+  const cont = document.getElementById("lista-tarifas");
+  cont.innerHTML = "";
+  for (const p of PRODUCTOS) {
+    const fila = document.createElement("div");
+    fila.className = "fila-tarifa";
+    fila.innerHTML = `<span class="dot" style="background:${p.color}"></span>
+      <span class="nom">${p.nombre}</span>
+      <span class="signo">$</span>`;
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.value = tarifas[p.id];
+    inp.oninput = () => { tarifas[p.id] = Number(inp.value) || 0; persistir(); renderProds(); actualizarPreview(); };
+    fila.appendChild(inp);
+    const suf = document.createElement("span");
+    suf.className = "signo"; suf.style.fontSize = "12px"; suf.textContent = "/h";
+    fila.appendChild(suf);
+    cont.appendChild(fila);
+  }
+}
+function actualizarSubtitulo() {
+  document.getElementById("subtitulo").textContent = "Registro de clases" + (nombre ? " · " + nombre : "");
+}
+
+// ---------- Init ----------
+cargar();
+document.getElementById("anio-header").textContent = hoy.getFullYear();
+document.getElementById("inp-fecha").value = hoyISO();
+document.getElementById("inp-nombre").addEventListener("input", e => {
+  nombre = e.target.value;
+  persistir();
+  actualizarSubtitulo();
+});
+renderProds();
+renderHoras();
+actualizarPreview();
+actualizarSubtitulo();
+</script>
+</body>
+</html>

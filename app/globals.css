@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+/*
+ * Paleta portada desde el index.html original (SnowLog · Las Leñas).
+ * Se exponen como variables de tema para usarlas con clases Tailwind
+ * (bg-superficie, text-tenue, border-borde, etc.).
+ */
+@theme {
+  --color-fondo: #060b12;
+  --color-fondo-2: #0a121d;
+  --color-superficie: #0d1520;
+  --color-superficie-2: #0b1420;
+  --color-borde: #1e2a3a;
+  --color-borde-tenue: #16202e;
+  --color-texto: #f0f6fc;
+  --color-texto-suave: #b8c7d9;
+  --color-tenue: #8fa3b8;
+  --color-tenue-2: #5b7089;
+  --color-acento: #7dd3fc;
+
+  /* Colores por producto */
+  --color-colectiva: #4ade80;
+  --color-snowriders: #38bdf8;
+  --color-particular: #fbbf24;
+  --color-requerida: #c084fc;
+
+  --font-sans: "Avenir Next", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: linear-gradient(180deg, #060b12 0%, #0a121d 100%);
+  min-height: 100vh;
+  color: var(--color-texto);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+}
