@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createClient } from "@/lib/supabase/client";
 import { BUCKET_FOTOS, NIVELES_INSTRUCTOR } from "@/lib/dominio";
 import type { Perfil } from "@/lib/tipos";
@@ -127,7 +133,12 @@ export function PerfilForm({
       fd.set("foto_url", url);
     }
 
-    formAction(fd);
+    // El dispatch puede venir después del `await` de la subida de foto, así
+    // que lo envolvemos en startTransition: si no, useActionState lo corre
+    // fuera de una transición y el redirect del server action se descarta.
+    startTransition(() => {
+      formAction(fd);
+    });
   }
 
   const ocupado = pending || subiendo;
