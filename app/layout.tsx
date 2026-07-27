@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -6,6 +7,10 @@ export const metadata: Metadata = {
   description:
     "Registro de clases para instructores de snowboard en Las Leñas: cargá tus clases y calculá cuánto cobrar.",
   applicationName: "SnowLog",
+  manifest: "/manifest.webmanifest",
+  formatDetection: {
+    telephone: false,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -28,7 +33,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="h-full antialiased">
-      <body className="flex flex-col">{children}</body>
+      <body className="flex flex-col">
+        {children}
+        <ServiceWorkerRegister />
+      </body>
     </html>
   );
 }
