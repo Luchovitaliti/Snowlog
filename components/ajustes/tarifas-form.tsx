@@ -75,7 +75,7 @@ function TarifaRow({
           type="number"
           inputMode="numeric"
           min={1}
-          step={500}
+          step="any"
           value={valor}
           onChange={(e) => setValor(e.target.value)}
           className="w-full bg-transparent px-2 py-3 text-base text-texto outline-none"
