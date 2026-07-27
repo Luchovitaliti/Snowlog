@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { TARIFAS_DEFAULT, type ProductoId } from "@/lib/dominio";
-import type { Perfil, TarifasMap } from "@/lib/tipos";
+import type { Clase, Perfil, TarifasMap } from "@/lib/tipos";
 
 // Accesos a datos del lado del servidor. RLS asegura que cada consulta
 // devuelve solo las filas del profesor autenticado.
@@ -29,4 +29,21 @@ export async function getPerfil(): Promise<Perfil | null> {
   const supabase = await createClient();
   const { data } = await supabase.from("perfiles").select("*").single();
   return (data as Perfil) ?? null;
+}
+
+/** Todas las clases del profesor, ordenadas por fecha descendente. */
+export async function getClases(): Promise<Clase[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("clases")
+    .select("*")
+    .order("fecha", { ascending: false });
+  return (data as Clase[]) ?? [];
+}
+
+/** Una clase por id (RLS: solo si es del propio profesor). */
+export async function getClase(id: string): Promise<Clase | null> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("clases").select("*").eq("id", id).single();
+  return (data as Clase) ?? null;
 }
