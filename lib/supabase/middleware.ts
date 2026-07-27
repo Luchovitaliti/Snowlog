@@ -30,7 +30,29 @@ export async function updateSession(request: NextRequest) {
   );
 
   // IMPORTANTE: getUser() revalida el token. No quitar esta llamada.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Rutas públicas (accesibles sin sesión).
+  const { pathname } = request.nextUrl;
+  const esRutaPublica =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/registro") ||
+    pathname.startsWith("/auth");
+
+  if (!user && !esRutaPublica) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Si ya tiene sesión y va a login/registro, lo mandamos a la app.
+  if (user && (pathname.startsWith("/login") || pathname.startsWith("/registro"))) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }
